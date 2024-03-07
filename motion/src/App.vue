@@ -3,18 +3,46 @@ import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import { MotionDirective as motion, type MotionVariants } from '@vueuse/motion'
 import { useMotions } from '@vueuse/motion'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useDrag, type EventTypes, type State } from '@vueuse/gesture'
 
 const vMotion = motion()
+
+const motions = useMotions()
 
 // Dummy custom event function
 const yourCustomEvent = () => {
   // Access the motion instance using useMotions.
-  const { customElement } = useMotions()
+  const { customElement } = motions
 
   console.log('Custom event triggered', customElement)
   // Edit the variant using the motion instance.
   customElement.variant.value = 'custom'
+}
+
+const dragHandler = ({ offset: [x, y], movement, dragging }: State['drag']) => {
+  const { dragDom } = motions
+
+  if (!dragDom) {
+    return
+  }
+  console.log('dragHandler', x, y, movement)
+
+  // if (!dragging) {
+  //   dragDom.apply({
+  //     x: 0,
+  //     y: 0,
+  //     cursor: 'grab'
+  //   })
+
+  //   return
+  // }
+
+  dragDom.apply({
+    x,
+    y,
+    cursor: 'grabbing'
+  })
 }
 </script>
 
@@ -27,6 +55,7 @@ const yourCustomEvent = () => {
       width="125"
       height="125"
       @click="yourCustomEvent"
+      v-drag="dragHandler"
     />
 
     <div
@@ -49,10 +78,31 @@ const yourCustomEvent = () => {
     </div>
   </header>
 
+  <div
+    class="box"
+    v-motion="'dragDom'"
+    v-drag="dragHandler"
+    :drag-options="{
+      filterTaps: true,
+      preventWindowScrollY: false
+    }"
+  >
+    drag item
+  </div>
+
   <RouterView />
 </template>
 
 <style scoped>
+.box {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  color: #fff;
+  z-index: 10;
+}
+
 header {
   line-height: 1.5;
   max-height: 100vh;
