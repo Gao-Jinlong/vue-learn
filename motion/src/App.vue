@@ -1,21 +1,45 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
-import {MotionDirective  as motion} from '@vueuse/motion'
+import { MotionDirective as motion, type MotionVariants } from '@vueuse/motion'
+import { useMotions } from '@vueuse/motion'
+import { onMounted } from 'vue'
 
 const vMotion = motion()
+
+// Dummy custom event function
+const yourCustomEvent = () => {
+  // Access the motion instance using useMotions.
+  const { customElement } = useMotions()
+
+  console.log('Custom event triggered', customElement)
+  // Edit the variant using the motion instance.
+  customElement.variant.value = 'custom'
+}
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+    <img
+      alt="Vue logo"
+      class="logo"
+      src="@/assets/logo.svg"
+      width="125"
+      height="125"
+      @click="yourCustomEvent"
+    />
 
-    <div class="wrapper" v-motion   
-    :initial="{ opacity: 0, y: 100 }"
-    :enter="{ opacity: 1, y: 0, scale: 1 }"
-    :variants="{ custom: { scale: 2 } }"
-    :hovered="{ scale: 1.2 }"
-    :delay="200" >
+    <div
+      class="wrapper"
+      v-motion="'customElement'"
+      :initial="{ opacity: 0 }"
+      :enter="{
+        opacity: 1,
+        transition: { repeat: Infinity, repeatType: 'mirror' }
+      }"
+      :variants="{ custom: { scale: 2 } }"
+      :delay="1000"
+    >
       <HelloWorld msg="You did it!" />
 
       <nav>
